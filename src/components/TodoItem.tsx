@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Todo, IssueStatus, Priority, IssueType } from "@/types/todo";
+import { useTheme } from "@/lib/theme";
 import {
   MoreHorizontal,
   Trash2,
@@ -90,6 +91,7 @@ export function TodoItem({
   onDragStart,
   isDragging,
 }: TodoItemProps) {
+  const { isDark } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [showMenu, setShowMenu] = useState(false);
@@ -157,8 +159,12 @@ export function TodoItem({
 
   return (
     <div
-      className="bg-white rounded shadow-sm border hover:shadow-md transition-shadow group cursor-pointer"
-      style={{ borderColor: "#DFE1E6", opacity: isDragging ? 0.5 : 1 }}
+      className="rounded shadow-sm border hover:shadow-md transition-shadow group cursor-pointer"
+      style={{
+        background: isDark ? "#253147" : "white",
+        borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+        opacity: isDragging ? 0.5 : 1,
+      }}
       onClick={() => {
         if (!isEditing && !isEditingPoints && onDetailOpen) onDetailOpen(todo.issueKey);
       }}
@@ -172,7 +178,7 @@ export function TodoItem({
         {/* Parent badge */}
         {hasParent && (
           <div className="mb-1.5">
-            <span className="text-xs" style={{ color: "#6B778C" }}>
+            <span className="text-xs" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               ↳ {todo.parentKey}
             </span>
           </div>
@@ -190,8 +196,12 @@ export function TodoItem({
 
           <div className="relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
             <button
-              className="w-6 h-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-gray-100 transition-all"
-              style={{ color: "#42526E" }}
+              className="w-6 h-6 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-all"
+              style={{
+                color: isDark ? "#8C9BAB" : "#42526E",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#2D3E57" : "#f3f4f6")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               onClick={() => {
                 setShowMenu((v) => !v);
                 setShowMoveMenu(false);
@@ -203,32 +213,39 @@ export function TodoItem({
             {showMenu && (
               <div
                 className="absolute right-0 top-7 z-30 w-44 rounded shadow-lg border py-1"
-                style={{ background: "white", borderColor: "#DFE1E6" }}
+                style={{
+                  background: isDark ? "#253147" : "white",
+                  borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                }}
               >
                 {onDetailOpen && (
                   <button
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
-                    style={{ color: "#172B4D" }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors text-left"
+                    style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f9fafb")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     onClick={() => {
                       setShowMenu(false);
                       onDetailOpen(todo.issueKey);
                     }}
                   >
-                    <Edit3 className="h-3.5 w-3.5 text-gray-400" />
+                    <Edit3 className="h-3.5 w-3.5" style={{ color: isDark ? "#8C9BAB" : "#9ca3af" }} />
                     View details
                   </button>
                 )}
 
                 <button
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
-                  style={{ color: "#172B4D" }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors text-left"
+                  style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f9fafb")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   onClick={() => {
                     setShowMenu(false);
                     setEditTitle(todo.title);
                     setIsEditing(true);
                   }}
                 >
-                  <Edit3 className="h-3.5 w-3.5 text-gray-400" />
+                  <Edit3 className="h-3.5 w-3.5" style={{ color: isDark ? "#8C9BAB" : "#9ca3af" }} />
                   Edit title
                 </button>
 
@@ -239,26 +256,33 @@ export function TodoItem({
                     onMouseLeave={() => setShowMoveMenu(false)}
                   >
                     <button
-                      className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-left"
-                      style={{ color: "#172B4D" }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-sm transition-colors text-left"
+                      style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f9fafb")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
                       <span className="flex items-center gap-2.5">
-                        <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+                        <ChevronRight className="h-3.5 w-3.5" style={{ color: isDark ? "#8C9BAB" : "#9ca3af" }} />
                         Move to
                       </span>
-                      <ChevronRight className="h-3 w-3 text-gray-400" />
+                      <ChevronRight className="h-3 w-3" style={{ color: isDark ? "#8C9BAB" : "#9ca3af" }} />
                     </button>
 
                     {showMoveMenu && (
                       <div
                         className="absolute left-full top-0 -ml-1 w-40 rounded shadow-lg border py-1 z-40"
-                        style={{ background: "white", borderColor: "#DFE1E6" }}
+                        style={{
+                          background: isDark ? "#253147" : "white",
+                          borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                        }}
                       >
                         {otherColumns.map((col) => (
                           <button
                             key={col.id}
-                            className="w-full text-left px-3 py-2 text-xs font-bold hover:bg-gray-50 transition-colors tracking-wide"
+                            className="w-full text-left px-3 py-2 text-xs font-bold transition-colors tracking-wide"
                             style={{ color: col.color }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f9fafb")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                             onClick={() => {
                               onStatusChange(todo.issueKey, col.id);
                               setShowMenu(false);
@@ -273,11 +297,13 @@ export function TodoItem({
                   </div>
                 )}
 
-                <hr style={{ borderColor: "#DFE1E6" }} className="my-1" />
+                <hr style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }} className="my-1" />
 
                 <button
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-red-50 transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors text-left"
                   style={{ color: "#DE350B" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#3D1A1A" : "#fef2f2")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   onClick={() => {
                     onDelete(todo.id);
                     setShowMenu(false);
@@ -304,7 +330,8 @@ export function TodoItem({
               className="w-full text-sm border rounded px-2 py-1.5 outline-none"
               style={{
                 borderColor: "#0052CC",
-                color: "#172B4D",
+                color: isDark ? "#E6EDF5" : "#172B4D",
+                background: isDark ? "#1B2232" : "white",
                 boxShadow: "0 0 0 2px rgba(0,82,204,0.2)",
               }}
               autoFocus
@@ -320,7 +347,11 @@ export function TodoItem({
               <button
                 onClick={handleCancel}
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border"
-                style={{ borderColor: "#DFE1E6", color: "#42526E" }}
+                style={{
+                  borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                  color: isDark ? "#8C9BAB" : "#42526E",
+                  background: isDark ? "#253147" : "white",
+                }}
               >
                 <X className="h-3 w-3" /> Cancel
               </button>
@@ -329,7 +360,7 @@ export function TodoItem({
         ) : (
           <p
             className="text-sm leading-snug"
-            style={{ color: "#172B4D" }}
+            style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
           >
             {todo.title}
           </p>
@@ -341,7 +372,10 @@ export function TodoItem({
             {subtaskCount > 0 && (
               <span
                 className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded"
-                style={{ background: "#F4F5F7", color: "#6B778C" }}
+                style={{
+                  background: isDark ? "#1E2C40" : "#F4F5F7",
+                  color: isDark ? "#8C9BAB" : "#6B778C",
+                }}
                 title={`${subtaskCount} subtask${subtaskCount !== 1 ? "s" : ""}`}
               >
                 <GitBranch className="h-3 w-3" />
@@ -351,7 +385,10 @@ export function TodoItem({
             {commentCount > 0 && (
               <span
                 className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded"
-                style={{ background: "#F4F5F7", color: "#6B778C" }}
+                style={{
+                  background: isDark ? "#1E2C40" : "#F4F5F7",
+                  color: isDark ? "#8C9BAB" : "#6B778C",
+                }}
                 title={`${commentCount} comment${commentCount !== 1 ? "s" : ""}`}
               >
                 <MessageSquare className="h-3 w-3" />
@@ -363,7 +400,7 @@ export function TodoItem({
 
         {/* Footer: key + SP + priority + assignee */}
         <div className="flex items-center justify-between mt-2.5">
-          <span className="text-xs font-medium" style={{ color: "#6B778C" }}>
+          <span className="text-xs font-medium" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
             {todo.issueKey}
           </span>
           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -383,7 +420,8 @@ export function TodoItem({
                     className="w-10 text-xs border rounded px-1 py-0.5 outline-none text-center"
                     style={{
                       borderColor: "#0052CC",
-                      color: "#172B4D",
+                      color: isDark ? "#E6EDF5" : "#172B4D",
+                      background: isDark ? "#1B2232" : "white",
                       boxShadow: "0 0 0 2px rgba(0,82,204,0.2)",
                     }}
                     autoFocus
@@ -399,8 +437,10 @@ export function TodoItem({
                   className="flex items-center justify-center min-w-5 h-5 px-1 rounded text-xs font-semibold hover:bg-blue-50 transition-colors"
                   style={{
                     background:
-                      todo.storyPoints != null ? "#DEEBFF" : "#F4F5F7",
-                    color: todo.storyPoints != null ? "#0052CC" : "#97A0AF",
+                      todo.storyPoints != null
+                        ? isDark ? "#1C3A6B" : "#DEEBFF"
+                        : isDark ? "#1E2C40" : "#F4F5F7",
+                    color: todo.storyPoints != null ? "#4C9AFF" : isDark ? "#8C9BAB" : "#97A0AF",
                   }}
                 >
                   {todo.storyPoints != null ? todo.storyPoints : "SP"}

@@ -1,49 +1,58 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronRight, Loader2, Send } from 'lucide-react';
-import { JiraCredentials, JiraComment } from '@/types/jira';
-import { IssueStatus, Priority } from '@/types/todo';
-import { useMySubtasks, SubtaskItem, SubtaskGroup } from '@/hooks/useMySubtasks';
-import { renderAdf } from '@/lib/jira-adf';
-import { jiraApi } from '@/lib/jira-api';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ChevronRight, Loader2, Send } from "lucide-react";
+import { JiraCredentials, JiraComment } from "@/types/jira";
+import { IssueStatus, Priority } from "@/types/todo";
+import {
+  useMySubtasks,
+  SubtaskItem,
+  SubtaskGroup,
+} from "@/hooks/useMySubtasks";
+import { renderAdf } from "@/lib/jira-adf";
+import { jiraApi } from "@/lib/jira-api";
+import { useTheme } from "@/lib/theme";
 
 const STATUS_COLORS: Record<IssueStatus, string> = {
-  todo: '#42526E',
-  devinprogress: '#0052CC',
-  donedevelop: '#88dae7',
-  qainprogress: '#6554C0',
-  bug: '#FF5630',
-  readytotest: '#FF991F',
-  readytodeploy: '#00B8D9',
-  onhold: '#97A0AF',
-  done: '#00875A',
+  todo: "#42526E",
+  devinprogress: "#0052CC",
+  donedevelop: "#88dae7",
+  qainprogress: "#6554C0",
+  bug: "#FF5630",
+  readytotest: "#FF991F",
+  readytodeploy: "#00B8D9",
+  onhold: "#97A0AF",
+  done: "#00875A",
 };
 
 const STATUS_LABELS: Record<IssueStatus, string> = {
-  todo: 'TO DO',
-  devinprogress: 'DEV IN PROGRESS',
-  donedevelop: 'DONE DEVELOP',
-  qainprogress: 'QA IN PROGRESS',
-  bug: 'BUG',
-  readytotest: 'READY TO TEST',
-  readytodeploy: 'READY TO DEPLOY',
-  onhold: 'ON HOLD',
-  done: 'DONE',
+  todo: "TO DO",
+  devinprogress: "DEV IN PROGRESS",
+  donedevelop: "DONE DEVELOP",
+  qainprogress: "QA IN PROGRESS",
+  bug: "BUG",
+  readytotest: "READY TO TEST",
+  readytodeploy: "READY TO DEPLOY",
+  onhold: "ON HOLD",
+  done: "DONE",
 };
 
 const PRIORITY_COLORS: Record<Priority, string> = {
-  highest: '#FF5630',
-  high: '#FF5630',
-  medium: '#FF991F',
-  low: '#97A0AF',
-  lowest: '#97A0AF',
+  highest: "#FF5630",
+  high: "#FF5630",
+  medium: "#FF991F",
+  low: "#97A0AF",
+  lowest: "#97A0AF",
 };
 
 function PriorityTriangle({ priority }: { priority: Priority }) {
   return (
     <span
-      style={{ color: PRIORITY_COLORS[priority], fontSize: '10px', lineHeight: 1 }}
+      style={{
+        color: PRIORITY_COLORS[priority],
+        fontSize: "10px",
+        lineHeight: 1,
+      }}
       title={priority}
     >
       ▲
@@ -54,7 +63,7 @@ function PriorityTriangle({ priority }: { priority: Priority }) {
 function StatusDot({ status }: { status: IssueStatus }) {
   return (
     <span
-      className='inline-block w-2 h-2 rounded-full flex-shrink-0'
+      className="inline-block w-2 h-2 rounded-full flex-shrink-0"
       style={{ background: STATUS_COLORS[status] }}
     />
   );
@@ -64,7 +73,7 @@ function StatusBadge({ status }: { status: IssueStatus }) {
   const color = STATUS_COLORS[status];
   return (
     <span
-      className='text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap'
+      className="text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap"
       style={{ background: `${color}20`, color }}
     >
       {STATUS_LABELS[status]}
@@ -73,13 +82,13 @@ function StatusBadge({ status }: { status: IssueStatus }) {
 }
 
 function ParentTypeBadge({ type }: { type: string }) {
-  const isEpic = type.toLowerCase() === 'epic';
+  const isEpic = type.toLowerCase() === "epic";
   return (
     <span
-      className='text-xs px-1.5 py-0.5 rounded font-medium'
+      className="text-xs px-1.5 py-0.5 rounded font-medium"
       style={{
-        background: isEpic ? '#EAE6FF' : '#DEEBFF',
-        color: isEpic ? '#6554C0' : '#0052CC',
+        background: isEpic ? "#EAE6FF" : "#DEEBFF",
+        color: isEpic ? "#6554C0" : "#0052CC",
       }}
     >
       {type}
@@ -87,74 +96,113 @@ function ParentTypeBadge({ type }: { type: string }) {
   );
 }
 
-function GroupRow({ group, isOpen, onToggle, selectedKey, onSelect }: { group: SubtaskGroup; isOpen: boolean; onToggle: () => void; selectedKey: string | null; onSelect: (task: SubtaskItem) => void }) {
+function GroupRow({
+  group,
+  isOpen,
+  onToggle,
+  selectedKey,
+  onSelect,
+  isDark,
+}: {
+  group: SubtaskGroup;
+  isOpen: boolean;
+  onToggle: () => void;
+  selectedKey: string | null;
+  onSelect: (task: SubtaskItem) => void;
+  isDark: boolean;
+}) {
   return (
     <div
-      className='border-b'
-      style={{ borderColor: '#DFE1E6' }}
+      className="border-b"
+      style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }}
     >
       <button
         onClick={onToggle}
-        className='w-full flex items-center gap-2 px-3 py-2.5 hover:bg-gray-200 transition-colors text-left'
-        style={{ background: isOpen ? '#EBECF0' : 'transparent' }}
+        className="w-full flex items-center gap-2 px-3 py-2.5 transition-colors text-left"
+        style={{
+          background: isOpen ? (isDark ? "#1E2C40" : "#EBECF0") : "transparent",
+        }}
+        onMouseEnter={(e) => {
+          if (!isOpen)
+            e.currentTarget.style.background = isDark ? "#1E2C40" : "#e5e7eb";
+        }}
+        onMouseLeave={(e) => {
+          if (!isOpen) e.currentTarget.style.background = "transparent";
+        }}
       >
         <ChevronRight
-          className='h-3.5 w-3.5 flex-shrink-0 transition-transform duration-150'
+          className="h-3.5 w-3.5 flex-shrink-0 transition-transform duration-150"
           style={{
-            color: '#6B778C',
-            transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+            color: isDark ? "#8C9BAB" : "#6B778C",
+            transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
           }}
         />
-        <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-1.5 flex-wrap'>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span
-              className='text-xs font-semibold'
-              style={{ color: '#0052CC' }}
+              className="text-xs font-semibold"
+              style={{ color: "#4C9AFF" }}
             >
               {group.parentKey}
             </span>
             <ParentTypeBadge type={group.parentType} />
           </div>
           <p
-            className='text-xs truncate mt-0.5'
-            style={{ color: '#172B4D' }}
+            className="text-xs truncate mt-0.5"
+            style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
           >
-            {group.parentTitle || '(No parent)'}
+            {group.parentTitle || "(No parent)"}
           </p>
         </div>
         <span
-          className='text-xs flex-shrink-0 font-medium tabular-nums'
-          style={{ color: '#6B778C' }}
+          className="text-xs flex-shrink-0 font-medium tabular-nums"
+          style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
         >
           {group.doneCount}/{group.subtasks.length}
         </span>
       </button>
 
       {isOpen && (
-        <div className='pb-1'>
+        <div className="pb-1">
           {group.subtasks.map((task) => {
             const isActive = selectedKey === task.key;
             return (
               <button
                 key={task.key}
                 onClick={() => onSelect(task)}
-                className='w-full flex items-center gap-2 py-1.5 pr-2 text-left hover:bg-blue-50 transition-colors'
+                className="w-full flex items-center gap-2 py-1.5 pr-2 text-left transition-colors"
                 style={{
-                  background: isActive ? '#DEEBFF' : 'transparent',
-                  borderLeft: isActive ? '3px solid #0052CC' : '3px solid transparent',
-                  paddingLeft: 'calc(1.75rem + 2px)',
+                  background: isActive
+                    ? isDark
+                      ? "#1C3A6B"
+                      : "#DEEBFF"
+                    : "transparent",
+                  borderLeft: isActive
+                    ? "3px solid #0052CC"
+                    : "3px solid transparent",
+                  paddingLeft: "calc(1.75rem + 2px)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = isDark
+                      ? "#1E2C40"
+                      : "#eff6ff";
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = "transparent";
                 }}
               >
                 <StatusDot status={task.status} />
                 <span
-                  className='flex-1 text-xs truncate min-w-0'
-                  style={{ color: '#172B4D' }}
+                  className="flex-1 text-xs truncate min-w-0"
+                  style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
                 >
                   {task.title}
                 </span>
                 <span
-                  className='text-xs flex-shrink-0 mr-1.5'
-                  style={{ color: '#6B778C' }}
+                  className="text-xs flex-shrink-0 mr-1.5"
+                  style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
                 >
                   {task.key}
                 </span>
@@ -168,16 +216,42 @@ function GroupRow({ group, isOpen, onToggle, selectedKey, onSelect }: { group: S
   );
 }
 
-const ALL_STATUSES: IssueStatus[] = ['todo', 'devinprogress', 'donedevelop', 'qainprogress', 'bug', 'readytotest', 'readytodeploy', 'onhold', 'done'];
+const ALL_STATUSES: IssueStatus[] = [
+  "todo",
+  "devinprogress",
+  "donedevelop",
+  "qainprogress",
+  "bug",
+  "readytotest",
+  "readytodeploy",
+  "onhold",
+  "done",
+];
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null; cred: JiraCredentials | null; onStatusChange: (key: string, status: IssueStatus) => void }) {
+function DetailPanel({
+  task,
+  creds,
+  onStatusChange,
+  isDark,
+}: {
+  task: SubtaskItem | null;
+  creds: JiraCredentials;
+  onStatusChange: (key: string, status: IssueStatus) => void;
+  isDark: boolean;
+}) {
   const [comments, setComments] = useState<JiraComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -195,9 +269,13 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
     if (!task || !commentText.trim() || !cred) return;
     setSubmitting(true);
     try {
-      const newComment = await jiraApi.addComment(cred, task.key, commentText.trim());
+      const newComment = await jiraApi.addComment(
+        cred,
+        task.key,
+        commentText.trim(),
+      );
       setComments((prev) => [...prev, newComment]);
-      setCommentText('');
+      setCommentText("");
     } catch {
       /* ignore */
     } finally {
@@ -211,29 +289,29 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
 
   return (
     <div
-      className='flex-1 overflow-y-auto p-6'
-      style={{ background: 'white' }}
+      className="flex-1 overflow-y-auto p-6"
+      style={{ background: isDark ? "#253147" : "white" }}
     >
       {/* Badge + key */}
-      <div className='flex items-center gap-2 mb-3'>
+      <div className="flex items-center gap-2 mb-3">
         <span
-          className='text-xs px-2 py-0.5 rounded font-medium'
-          style={{ background: '#EAE6FF', color: '#6554C0' }}
+          className="text-xs px-2 py-0.5 rounded font-medium"
+          style={{
+            background: isDark ? "#2D1F5E" : "#EAE6FF",
+            color: "#6554C0",
+          }}
         >
           Sub-task
         </span>
-        <span
-          className='text-xs font-semibold'
-          style={{ color: '#0052CC' }}
-        >
+        <span className="text-xs font-semibold" style={{ color: "#4C9AFF" }}>
           {task.key}
         </span>
       </div>
 
       {/* Title */}
       <h2
-        className='text-lg font-semibold mb-4 leading-snug'
-        style={{ color: '#172B4D' }}
+        className="text-lg font-semibold mb-4 leading-snug"
+        style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
       >
         {task.title}
       </h2>
@@ -241,27 +319,30 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
       {/* Parent issue block */}
       {task.parentKey && (
         <div
-          className='mb-5 p-3 rounded border'
-          style={{ borderColor: '#DFE1E6', background: '#F4F5F7' }}
+          className="mb-5 p-3 rounded border"
+          style={{
+            borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+            background: isDark ? "#1E2C40" : "#F4F5F7",
+          }}
         >
           <p
-            className='text-xs mb-1.5'
-            style={{ color: '#6B778C' }}
+            className="text-xs mb-1.5"
+            style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
           >
             Parent issue
           </p>
-          <div className='flex items-center gap-2 mb-1'>
+          <div className="flex items-center gap-2 mb-1">
             <span
-              className='text-sm font-semibold'
-              style={{ color: '#0052CC' }}
+              className="text-sm font-semibold"
+              style={{ color: "#4C9AFF" }}
             >
               {task.parentKey}
             </span>
             <ParentTypeBadge type={task.parentType} />
           </div>
           <p
-            className='text-sm'
-            style={{ color: '#172B4D' }}
+            className="text-sm"
+            style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
           >
             {task.parentTitle}
           </p>
@@ -269,25 +350,24 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
       )}
 
       {/* Metadata grid */}
-      <div className='grid grid-cols-2 gap-x-4 gap-y-3 mb-5'>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5">
         {[
           {
-            label: 'Status',
+            label: "Status",
             value: (
               <select
                 value={task.status}
-                onChange={(e) => onStatusChange(task.key, e.target.value as IssueStatus)}
-                className='text-xs px-1.5 py-0.5 rounded font-medium border-0 cursor-pointer outline-none'
+                onChange={(e) =>
+                  onStatusChange(task.key, e.target.value as IssueStatus)
+                }
+                className="text-xs px-1.5 py-0.5 rounded font-medium border-0 cursor-pointer outline-none"
                 style={{
                   background: `${STATUS_COLORS[task.status]}20`,
                   color: STATUS_COLORS[task.status],
                 }}
               >
                 {ALL_STATUSES.map((s) => (
-                  <option
-                    key={s}
-                    value={s}
-                  >
+                  <option key={s} value={s}>
                     {STATUS_LABELS[s]}
                   </option>
                 ))}
@@ -295,13 +375,13 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
             ),
           },
           {
-            label: 'Priority',
+            label: "Priority",
             value: (
-              <div className='flex items-center gap-1.5'>
+              <div className="flex items-center gap-1.5">
                 <PriorityTriangle priority={task.priority} />
                 <span
-                  className='text-sm capitalize'
-                  style={{ color: '#172B4D' }}
+                  className="text-sm capitalize"
+                  style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
                 >
                   {task.priority}
                 </span>
@@ -309,22 +389,22 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
             ),
           },
           {
-            label: 'Assignee',
+            label: "Assignee",
             value: (
               <span
-                className='text-sm'
-                style={{ color: '#172B4D' }}
+                className="text-sm"
+                style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
               >
-                {task.assigneeDisplayName ?? 'Unassigned'}
+                {task.assigneeDisplayName ?? "Unassigned"}
               </span>
             ),
           },
           {
-            label: 'Updated',
+            label: "Updated",
             value: (
               <span
-                className='text-sm'
-                style={{ color: '#172B4D' }}
+                className="text-sm"
+                style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
               >
                 {new Date(task.updatedAt).toLocaleDateString()}
               </span>
@@ -333,8 +413,8 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
         ].map(({ label, value }) => (
           <div key={label}>
             <p
-              className='text-xs mb-1'
-              style={{ color: '#6B778C' }}
+              className="text-xs mb-1"
+              style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
             >
               {label}
             </p>
@@ -346,22 +426,24 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
       {/* Description */}
       <div>
         <p
-          className='text-xs mb-2'
-          style={{ color: '#6B778C' }}
+          className="text-xs mb-2"
+          style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
         >
           Description
         </p>
         {task.description ? (
           <div
-            className='text-sm prose-sm'
-            style={{ color: '#172B4D' }}
+            className="text-sm prose-sm"
+            style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
           >
-            {typeof task.description === 'string' ? task.description : renderAdf(task.description, issueUrl)}
+            {typeof task.description === "string"
+              ? task.description
+              : renderAdf(task.description, issueUrl)}
           </div>
         ) : (
           <p
-            className='text-sm'
-            style={{ color: '#97A0AF' }}
+            className="text-sm"
+            style={{ color: isDark ? "#8C9BAB" : "#97A0AF" }}
           >
             No description
           </p>
@@ -370,63 +452,67 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
 
       {/* Comments */}
       <div
-        className='mt-6 pt-5 border-t'
-        style={{ borderColor: '#DFE1E6' }}
+        className="mt-6 pt-5 border-t"
+        style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }}
       >
         <p
-          className='text-xs font-semibold mb-3 uppercase tracking-wide'
-          style={{ color: '#6B778C' }}
+          className="text-xs font-semibold mb-3 uppercase tracking-wide"
+          style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
         >
           Comments {comments.length > 0 && `(${comments.length})`}
         </p>
 
         {loadingComments && (
-          <div className='flex items-center gap-2 py-2'>
+          <div className="flex items-center gap-2 py-2">
             <Loader2
-              className='h-3.5 w-3.5 animate-spin'
-              style={{ color: '#6B778C' }}
+              className="h-3.5 w-3.5 animate-spin"
+              style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
             />
             <span
-              className='text-xs'
-              style={{ color: '#6B778C' }}
+              className="text-xs"
+              style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
             >
               Loading comments...
             </span>
           </div>
         )}
 
-        <div className='space-y-4 mb-4'>
+        <div className="space-y-4 mb-4">
           {comments.map((comment) => (
-            <div
-              key={comment.id}
-              className='flex gap-3'
-            >
+            <div key={comment.id} className="flex gap-3">
               <div
-                className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0'
-                style={{ background: '#0052CC', color: 'white' }}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: "#0052CC", color: "white" }}
               >
-                {comment.author.displayName[0].toUpperCase()}
+                {comment.author.displayName?.[0]?.toUpperCase() ?? "?"}
               </div>
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-baseline gap-2 mb-1'>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 mb-1">
                   <span
-                    className='text-xs font-semibold'
-                    style={{ color: '#172B4D' }}
+                    className="text-xs font-semibold"
+                    style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
                   >
                     {comment.author.displayName}
                   </span>
                   <span
-                    className='text-xs'
-                    style={{ color: '#97A0AF' }}
+                    className="text-xs"
+                    style={{ color: isDark ? "#8C9BAB" : "#97A0AF" }}
                   >
                     {formatDate(comment.created)}
                   </span>
                 </div>
                 <div
-                  className='rounded p-2.5 text-sm'
-                  style={{ background: '#F4F5F7', color: '#172B4D' }}
+                  className="rounded p-2.5 text-sm"
+                  style={{
+                    background: isDark ? "#1E2C40" : "#F4F5F7",
+                    color: isDark ? "#E6EDF5" : "#172B4D",
+                  }}
                 >
-                  {typeof comment.body === 'string' ? <p>{comment.body}</p> : renderAdf(comment.body, issueUrl)}
+                  {typeof comment.body === "string" ? (
+                    <p>{comment.body}</p>
+                  ) : (
+                    renderAdf(comment.body, issueUrl)
+                  )}
                 </div>
               </div>
             </div>
@@ -434,29 +520,34 @@ function DetailPanel({ task, cred, onStatusChange }: { task: SubtaskItem | null;
         </div>
 
         {/* Add comment */}
-        <div className='flex gap-2 items-end'>
+        <div className="flex gap-2 items-end">
           <textarea
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitComment();
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey))
+                submitComment();
             }}
-            placeholder='Add a comment... (⌘+Enter to send)'
+            placeholder="Add a comment... (⌘+Enter to send)"
             rows={2}
-            className='flex-1 text-sm rounded border px-3 py-2 resize-none outline-none focus:ring-1'
+            className="flex-1 text-sm rounded border px-3 py-2 resize-none outline-none focus:ring-1"
             style={{
-              borderColor: '#DFE1E6',
-              color: '#172B4D',
-              background: 'white',
+              borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+              color: isDark ? "#E6EDF5" : "#172B4D",
+              background: isDark ? "#1B2232" : "white",
             }}
           />
           <button
             onClick={submitComment}
             disabled={!commentText.trim() || submitting}
-            className='flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors disabled:opacity-40'
-            style={{ background: '#0052CC', color: 'white' }}
+            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors disabled:opacity-40"
+            style={{ background: "#0052CC", color: "white" }}
           >
-            {submitting ? <Loader2 className='h-3.5 w-3.5 animate-spin' /> : <Send className='h-3.5 w-3.5' />}
+            {submitting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
           </button>
         </div>
       </div>
@@ -468,8 +559,12 @@ interface SubTasksSidePanelProps {
   cred: JiraCredentials | null;
 }
 
-export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
-  const { groups, loading, error, refresh, moveSubtask } = useMySubtasks(cred, cred?.projectKey ?? null);
+export function SubTasksSidePanel({ creds }: SubTasksSidePanelProps) {
+  const { isDark } = useTheme();
+  const { groups, loading, error, refresh, moveSubtask } = useMySubtasks(
+    creds,
+    creds.projectKey ?? null,
+  );
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<SubtaskItem | null>(null);
   const [panelWidth, setPanelWidth] = useState(260);
@@ -482,10 +577,10 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
       isDragging.current = true;
       startX.current = e.clientX;
       startWidth.current = panelWidth;
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
     },
-    [panelWidth]
+    [panelWidth],
   );
 
   useEffect(() => {
@@ -497,14 +592,14 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
     const onMouseUp = () => {
       if (!isDragging.current) return;
       isDragging.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
     };
   }, []);
 
@@ -523,7 +618,9 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
   const handleStatusChange = (key: string, status: IssueStatus) => {
     moveSubtask(key, status);
     if (selectedTask?.key === key) {
-      setSelectedTask((prev) => (prev ? { ...prev, status, statusName: STATUS_LABELS[status] } : null));
+      setSelectedTask((prev) =>
+        prev ? { ...prev, status, statusName: STATUS_LABELS[status] } : null,
+      );
     }
   };
 
@@ -537,49 +634,49 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
   };
 
   return (
-    <div className='flex flex-1 overflow-hidden'>
+    <div className="flex flex-1 overflow-hidden">
       {/* Left panel — resizable */}
       <div
-        className='flex-shrink-0 flex flex-col overflow-y-auto'
-        style={{ width: selectedTask ? panelWidth : '100%', background: '#F4F5F7' }}
+        className="flex-shrink-0 flex flex-col overflow-y-auto"
+        style={{
+          width: selectedTask ? panelWidth : "100%",
+          background: isDark ? "#1B2232" : "#F4F5F7",
+        }}
       >
         <div
-          className='px-3 py-2.5 border-b flex items-center justify-between flex-shrink-0'
-          style={{ borderColor: '#DFE1E6' }}
+          className="px-3 py-2.5 border-b flex items-center justify-between flex-shrink-0"
+          style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }}
         >
           <span
-            className='text-sm font-semibold'
-            style={{ color: '#172B4D' }}
+            className="text-sm font-semibold"
+            style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}
           >
             My Sub-tasks
           </span>
           {loading && (
             <Loader2
-              className='h-3.5 w-3.5 animate-spin'
-              style={{ color: '#6B778C' }}
+              className="h-3.5 w-3.5 animate-spin"
+              style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
             />
           )}
         </div>
 
         {error && (
-          <p
-            className='px-3 py-2 text-xs'
-            style={{ color: '#FF5630' }}
-          >
+          <p className="px-3 py-2 text-xs" style={{ color: "#FF5630" }}>
             {error}
           </p>
         )}
 
         {!loading && groups.length === 0 && !error && (
           <p
-            className='px-3 py-6 text-xs text-center'
-            style={{ color: '#97A0AF' }}
+            className="px-3 py-6 text-xs text-center"
+            style={{ color: isDark ? "#8C9BAB" : "#97A0AF" }}
           >
             No sub-tasks in current sprint
           </p>
         )}
 
-        <div className='flex-1'>
+        <div className="flex-1">
           {groups.map((group) => (
             <GroupRow
               key={group.parentKey}
@@ -588,6 +685,7 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
               onToggle={() => toggleGroup(group.parentKey)}
               selectedKey={selectedTask?.key ?? null}
               onSelect={setSelectedTask}
+              isDark={isDark}
             />
           ))}
         </div>
@@ -598,18 +696,19 @@ export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
         <>
           <div
             onMouseDown={onMouseDown}
-            className='flex-shrink-0 w-1 hover:w-1.5 transition-all cursor-col-resize relative'
-            style={{ background: '#DFE1E6' }}
+            className="flex-shrink-0 w-1 hover:w-1.5 transition-all cursor-col-resize relative"
+            style={{ background: isDark ? "#2D3E57" : "#DFE1E6" }}
           >
             <div
-              className='absolute inset-y-0 -left-1 -right-1'
-              style={{ cursor: 'col-resize' }}
+              className="absolute inset-y-0 -left-1 -right-1"
+              style={{ cursor: "col-resize" }}
             />
           </div>
           <DetailPanel
             task={selectedTask}
-            cred={cred}
+            creds={creds}
             onStatusChange={handleStatusChange}
+            isDark={isDark}
           />
         </>
       )}

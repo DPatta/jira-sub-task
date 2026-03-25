@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Todo, IssueStatus, IssueType, Priority } from "@/types/todo"
 import { X, Bug, CheckSquare, BookOpen, ChevronDown } from "lucide-react"
+import { useTheme } from "@/lib/theme"
 
 interface AddTodoProps {
   defaultStatus: IssueStatus
@@ -40,6 +41,7 @@ const STATUSES: { value: IssueStatus; label: string; color: string }[] = [
 ]
 
 export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConnected, createError }: AddTodoProps) {
+  const { isDark } = useTheme()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [type, setType] = useState<IssueType>("task")
@@ -65,20 +67,26 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
     >
       <div
         className="w-full max-w-lg rounded-lg shadow-2xl"
-        style={{ background: "white", maxHeight: "90vh", overflowY: "auto" }}
+        style={{
+          background: isDark ? "#253147" : "white",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
       >
         {/* Modal header */}
         <div
           className="flex items-center justify-between px-6 py-4 border-b"
-          style={{ borderColor: "#DFE1E6" }}
+          style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }}
         >
-          <h2 className="text-lg font-semibold" style={{ color: "#172B4D" }}>
+          <h2 className="text-lg font-semibold" style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}>
             Create issue
           </h2>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
-            style={{ color: "#6B778C" }}
+            className="w-7 h-7 flex items-center justify-center rounded transition-colors"
+            style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f3f4f6")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -87,12 +95,16 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
           {/* Project (read-only) */}
           <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               PROJECT
             </label>
             <div
               className="flex items-center gap-2 h-9 px-3 rounded border text-sm"
-              style={{ borderColor: "#DFE1E6", color: "#172B4D", background: "#F4F5F7" }}
+              style={{
+                borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                color: isDark ? "#E6EDF5" : "#172B4D",
+                background: isDark ? "#1E2C40" : "#F4F5F7",
+              }}
             >
               <div
                 className="w-5 h-5 rounded text-white flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -106,7 +118,7 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
 
           {/* Issue Type */}
           <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               ISSUE TYPE <span style={{ color: "#DE350B" }}>*</span>
             </label>
             <div className="relative">
@@ -115,8 +127,9 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
                 onChange={(e) => setType(e.target.value as IssueType)}
                 className="w-full h-9 pl-3 pr-8 rounded border text-sm appearance-none outline-none focus:ring-2 cursor-pointer"
                 style={{
-                  borderColor: "#DFE1E6",
-                  color: "#172B4D",
+                  borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                  color: isDark ? "#E6EDF5" : "#172B4D",
+                  background: isDark ? "#1B2232" : "white",
                   boxShadow: "none",
                 }}
               >
@@ -128,19 +141,19 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
               </select>
               <ChevronDown
                 className="h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "#6B778C" }}
+                style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
               />
             </div>
-            <p className="text-xs mt-1.5" style={{ color: "#6B778C" }}>
+            <p className="text-xs mt-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               Start typing to get a list of possible matches.
             </p>
           </div>
 
-          <hr style={{ borderColor: "#DFE1E6" }} />
+          <hr style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }} />
 
           {/* Summary (title) */}
           <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               SUMMARY <span style={{ color: "#DE350B" }}>*</span>
             </label>
             <input
@@ -149,7 +162,11 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter a summary for the issue"
               className="w-full h-9 px-3 rounded border text-sm outline-none transition-shadow"
-              style={{ borderColor: "#DFE1E6", color: "#172B4D" }}
+              style={{
+                borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                color: isDark ? "#E6EDF5" : "#172B4D",
+                background: isDark ? "#1B2232" : "white",
+              }}
               onFocus={(e) => (e.target.style.boxShadow = "0 0 0 2px rgba(0,82,204,0.2)")}
               onBlur={(e) => (e.target.style.boxShadow = "none")}
               autoFocus
@@ -158,7 +175,7 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
               DESCRIPTION
             </label>
             <textarea
@@ -167,7 +184,11 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
               placeholder="Describe the issue..."
               rows={3}
               className="w-full px-3 py-2 rounded border text-sm outline-none resize-none transition-shadow"
-              style={{ borderColor: "#DFE1E6", color: "#172B4D" }}
+              style={{
+                borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                color: isDark ? "#E6EDF5" : "#172B4D",
+                background: isDark ? "#1B2232" : "white",
+              }}
               onFocus={(e) => (e.target.style.boxShadow = "0 0 0 2px rgba(0,82,204,0.2)")}
               onBlur={(e) => (e.target.style.boxShadow = "none")}
             />
@@ -177,7 +198,7 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
           <div className={isJiraConnected ? "" : "grid grid-cols-2 gap-4"}>
             {!isJiraConnected && (
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
                   STATUS
                 </label>
                 <div className="relative">
@@ -185,7 +206,11 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
                     value={status}
                     onChange={(e) => setStatus(e.target.value as IssueStatus)}
                     className="w-full h-9 pl-3 pr-8 rounded border text-sm font-semibold appearance-none outline-none cursor-pointer"
-                    style={{ borderColor: "#DFE1E6", color: selectedStatus.color }}
+                    style={{
+                      borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                      color: selectedStatus.color,
+                      background: isDark ? "#1B2232" : "white",
+                    }}
                   >
                     {STATUSES.map((s) => (
                       <option key={s.value} value={s.value}>
@@ -195,14 +220,14 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
                   </select>
                   <ChevronDown
                     className="h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{ color: "#6B778C" }}
+                    style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
                   />
                 </div>
               </div>
             )}
 
             <div className={isJiraConnected ? "" : ""}>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: "#6B778C" }}>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}>
                 PRIORITY
               </label>
               <div className="relative">
@@ -210,7 +235,11 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as Priority)}
                   className="w-full h-9 pl-3 pr-8 rounded border text-sm appearance-none outline-none cursor-pointer"
-                  style={{ borderColor: "#DFE1E6", color: selectedPriority.color }}
+                  style={{
+                    borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                    color: selectedPriority.color,
+                    background: isDark ? "#1B2232" : "white",
+                  }}
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p.value} value={p.value}>
@@ -220,7 +249,7 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
                 </select>
                 <ChevronDown
                   className="h-3.5 w-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                  style={{ color: "#6B778C" }}
+                  style={{ color: isDark ? "#8C9BAB" : "#6B778C" }}
                 />
               </div>
             </div>
@@ -239,13 +268,19 @@ export function AddTodo({ defaultStatus, projectName, onAdd, onClose, isJiraConn
           {/* Footer */}
           <div
             className="flex items-center justify-end gap-2 pt-2 border-t"
-            style={{ borderColor: "#DFE1E6" }}
+            style={{ borderColor: isDark ? "#2D3E57" : "#DFE1E6" }}
           >
             <button
               type="button"
               onClick={onClose}
-              className="px-4 h-9 text-sm font-medium rounded border hover:bg-gray-50 transition-colors"
-              style={{ borderColor: "#DFE1E6", color: "#42526E" }}
+              className="px-4 h-9 text-sm font-medium rounded border transition-colors"
+              style={{
+                borderColor: isDark ? "#2D3E57" : "#DFE1E6",
+                color: isDark ? "#8C9BAB" : "#42526E",
+                background: isDark ? "#253147" : "white",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = isDark ? "#1E2C40" : "#f9fafb")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = isDark ? "#253147" : "white")}
             >
               Cancel
             </button>

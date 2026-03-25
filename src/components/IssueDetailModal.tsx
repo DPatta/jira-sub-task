@@ -34,12 +34,17 @@ interface IssueDetailModalProps {
   onTitleUpdate: (key: string, title: string) => void;
 }
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  new: { bg: "#F4F5F7", color: "#42526E" },
-  indeterminate: { bg: "#DEEBFF", color: "#0052CC" },
-  done: { bg: "#E3FCEF", color: "#00875A" },
-  undefined: { bg: "#F4F5F7", color: "#42526E" },
+const STATUS_COLORS: Record<string, { bg: string; bgDark: string; color: string }> = {
+  new: { bg: "#F4F5F7", bgDark: "#2D3748", color: "#42526E" },
+  indeterminate: { bg: "#DEEBFF", bgDark: "#1C3A6B", color: "#0052CC" },
+  done: { bg: "#E3FCEF", bgDark: "#0B3D2E", color: "#00875A" },
+  undefined: { bg: "#F4F5F7", bgDark: "#2D3748", color: "#42526E" },
 };
+
+function getStatusColors(key: string, isDark: boolean) {
+  const entry = STATUS_COLORS[key] ?? STATUS_COLORS.undefined;
+  return { bg: isDark ? entry.bgDark : entry.bg, color: entry.color };
+}
 
 function getTypeIcon(name: string) {
   const lower = name.toLowerCase();
@@ -107,10 +112,10 @@ function UserAvatar({
   );
 }
 
-function renderCommentBody(body: JiraComment["body"], issueUrl?: string) {
+function renderCommentBody(body: JiraComment["body"], isDark: boolean, issueUrl?: string) {
   if (typeof body === "string") {
     return (
-      <p className="text-sm" style={{ color: "#172B4D" }}>
+      <p className="text-sm" style={{ color: isDark ? "#E6EDF5" : "#172B4D" }}>
         {body}
       </p>
     );
@@ -246,8 +251,7 @@ export function IssueDetailModal({
 
   const statusCategoryKey =
     issue?.fields.status.statusCategory?.key ?? "undefined";
-  const statusColors =
-    STATUS_COLORS[statusCategoryKey] ?? STATUS_COLORS.undefined;
+  const statusColors = getStatusColors(statusCategoryKey, isDark);
   const comments = issue?.fields.comment?.comments ?? [];
   const subtasks = issue?.fields.subtasks ?? [];
 
@@ -440,8 +444,7 @@ export function IssueDetailModal({
                     {subtasks.map((sub) => {
                       const subCatKey =
                         sub.fields.status.statusCategory?.key ?? "undefined";
-                      const subColors =
-                        STATUS_COLORS[subCatKey] ?? STATUS_COLORS.undefined;
+                      const subColors = getStatusColors(subCatKey, isDark);
                       return (
                         <div
                           key={sub.id}
@@ -522,7 +525,7 @@ export function IssueDetailModal({
                             color: isDark ? "#E6EDF5" : "#172B4D",
                           }}
                         >
-                          {renderCommentBody(comment.body, issueUrl)}
+                          {renderCommentBody(comment.body, isDark, issueUrl)}
                         </div>
                       </div>
                     </div>
@@ -627,9 +630,7 @@ export function IssueDetailModal({
                       }}
                     >
                       {transitions.map((t) => {
-                        const tColors =
-                          STATUS_COLORS[t.to.statusCategory.key] ??
-                          STATUS_COLORS.undefined;
+                        const tColors = getStatusColors(t.to.statusCategory.key, isDark);
                         return (
                           <button
                             key={t.id}

@@ -81,13 +81,15 @@ function StatusBadge({ status }: { status: IssueStatus }) {
   );
 }
 
-function ParentTypeBadge({ type }: { type: string }) {
+function ParentTypeBadge({ type, isDark }: { type: string; isDark: boolean }) {
   const isEpic = type.toLowerCase() === "epic";
   return (
     <span
       className="text-xs px-1.5 py-0.5 rounded font-medium"
       style={{
-        background: isEpic ? "#EAE6FF" : "#DEEBFF",
+        background: isEpic
+          ? isDark ? "#2D1F5E" : "#EAE6FF"
+          : isDark ? "#1C3A6B" : "#DEEBFF",
         color: isEpic ? "#6554C0" : "#0052CC",
       }}
     >
@@ -145,7 +147,7 @@ function GroupRow({
             >
               {group.parentKey}
             </span>
-            <ParentTypeBadge type={group.parentType} />
+            <ParentTypeBadge type={group.parentType} isDark={isDark} />
           </div>
           <p
             className="text-xs truncate mt-0.5"
@@ -240,12 +242,12 @@ function formatDate(iso: string) {
 
 function DetailPanel({
   task,
-  creds,
+  cred,
   onStatusChange,
   isDark,
 }: {
   task: SubtaskItem | null;
-  creds: JiraCredentials;
+  cred: JiraCredentials | null;
   onStatusChange: (key: string, status: IssueStatus) => void;
   isDark: boolean;
 }) {
@@ -338,7 +340,7 @@ function DetailPanel({
             >
               {task.parentKey}
             </span>
-            <ParentTypeBadge type={task.parentType} />
+            <ParentTypeBadge type={task.parentType} isDark={isDark} />
           </div>
           <p
             className="text-sm"
@@ -559,11 +561,11 @@ interface SubTasksSidePanelProps {
   cred: JiraCredentials | null;
 }
 
-export function SubTasksSidePanel({ creds }: SubTasksSidePanelProps) {
+export function SubTasksSidePanel({ cred }: SubTasksSidePanelProps) {
   const { isDark } = useTheme();
   const { groups, loading, error, refresh, moveSubtask } = useMySubtasks(
-    creds,
-    creds.projectKey ?? null,
+    cred,
+    cred?.projectKey ?? null,
   );
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<SubtaskItem | null>(null);
@@ -706,7 +708,7 @@ export function SubTasksSidePanel({ creds }: SubTasksSidePanelProps) {
           </div>
           <DetailPanel
             task={selectedTask}
-            creds={creds}
+            cred={cred}
             onStatusChange={handleStatusChange}
             isDark={isDark}
           />

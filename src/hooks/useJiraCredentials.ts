@@ -1,35 +1,34 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { JiraCredentials } from "@/types/jira"
-import { loadCredentials, saveCredentials, clearCredentials } from "@/lib/jira-credentials"
+import { useState } from 'react';
+import { JiraCredentials } from '@/types/jira';
+import { loadCredentials, saveCredentials, clearCredentials } from '@/lib/jira-credentials';
 
 interface UseJiraCredentialsReturn {
-  creds: JiraCredentials | null
-  isReady: boolean
-  save: (creds: JiraCredentials) => void
-  clear: () => void
+  cred: JiraCredentials | null;
+  isReady: boolean;
+  save: (cred: JiraCredentials) => void;
+  clear: () => void;
 }
 
 export function useJiraCredentials(): UseJiraCredentialsReturn {
   // Lazy initializer runs only on the client (window is defined), never on the server.
   // This replaces the useEffect + setState pattern while keeping SSR-safe behavior.
-  const [creds, setCreds] = useState<JiraCredentials | null>(() =>
-    typeof window !== "undefined" ? loadCredentials() : null
-  )
+  const [cred, setcred] = useState<JiraCredentials | null>(() => (typeof window !== 'undefined' ? loadCredentials() : null));
 
   // isReady mirrors whether the client has hydrated (always true after first render on client)
-  const [isReady] = useState(() => typeof window !== "undefined")
+  const [isReady] = useState(() => typeof window !== 'undefined');
 
-  const save = (newCreds: JiraCredentials) => {
-    saveCredentials(newCreds)
-    setCreds(newCreds)
-  }
+  const save = (newcred: JiraCredentials) => {
+    saveCredentials(newcred);
+    setcred(newcred);
+  };
 
   const clear = () => {
-    clearCredentials()
-    setCreds(null)
-  }
+    clearCredentials();
+    setcred(null);
+    window.location.reload();
+  };
 
-  return { creds, isReady, save, clear }
+  return { cred, isReady, save, clear };
 }

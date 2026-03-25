@@ -19,21 +19,25 @@ This is a Next.js 16 app (App Router) with TypeScript, Tailwind CSS, and Radix U
 ### Key Architecture Patterns
 
 **State Management**: Jira Cloud as backend + React state
+
 - `useJiraBoard` hook (`src/hooks/useJiraBoard.ts`) fetches issues via Jira API and manages board state
 - `useJiraCredentials` hook (`src/hooks/useJiraCredentials.ts`) manages auth state from localStorage
 - No external state management library — uses React useState/useEffect/useCallback
 
 **UI Component System**: Built on Radix UI + Class Variance Authority (CVA)
+
 - Base UI components in `src/components/ui/` use CVA for variant styling
 - Components follow Radix UI patterns with forwarded refs and Slot composition
 - `cn()` utility in `src/lib/utils.ts` merges Tailwind classes with twMerge
 
 **Styling**: CSS custom properties + Tailwind CSS + inline style props
+
 - Dark mode support via CSS class toggle (`darkMode: ["class"]` in tailwind.config.js)
 - Jira color palette applied via inline `style` props — do not replace with Tailwind
 - Component variants defined with CVA, not separate CSS files
 
 **Data Flow**:
+
 - `Todo` interface in `src/types/todo.ts` with id, issueKey, title, status, priority, type, createdAt, updatedAt
 - `BoardTodo` extends `Todo` with Jira-specific fields (jiraId, commentCount, subtaskKeys, etc.)
 - CRUD operations proxied through `/api/jira/[...path]` to Jira Cloud
@@ -68,12 +72,13 @@ This is a Next.js 16 app (App Router) with TypeScript, Tailwind CSS, and Radix U
 
 - Jira credentials stored in localStorage key `"jira-credentials"`
 - Shape: `{ siteUrl, email, token, accountId, projectKey?, projectName? }`
-- Auth flow: `JiraLoginModal` → `getMyself()` → save creds → `ProjectSelectModal` → save project → board
+- Auth flow: `JiraLoginModal` → `getMyself()` → save cred → `ProjectSelectModal` → save project → board
 - Credentials passed to every API call as `x-jira-site`, `x-jira-email`, `x-jira-token` headers
 
 ### Proxy
 
 `src/app/api/jira/[...path]/route.ts` forwards all Jira REST API calls:
+
 - Reads `x-jira-*` headers, returns 401 if missing
 - Builds URL: `${siteUrl}/rest/api/3/${path}?${queryParams}`
 - Adds `Authorization: Basic base64(email:token)`
@@ -82,7 +87,7 @@ This is a Next.js 16 app (App Router) with TypeScript, Tailwind CSS, and Radix U
 
 ### Hooks
 
-- `useJiraCredentials` (`src/hooks/useJiraCredentials.ts`): hydrates from localStorage, exposes `{ creds, isReady, save, clear }`
+- `useJiraCredentials` (`src/hooks/useJiraCredentials.ts`): hydrates from localStorage, exposes `{ cred, isReady, save, clear }`
 - `useJiraBoard` (`src/hooks/useJiraBoard.ts`): fetches issues, exposes `{ todos, loading, error, refresh, moveIssue, updateTitle }`
 
 ### Key Lib Files
@@ -96,7 +101,7 @@ This is a Next.js 16 app (App Router) with TypeScript, Tailwind CSS, and Radix U
 Jira uses status categories, not fixed status names. The app maps:
 
 | Jira `statusCategory.key` | App `IssueStatus` |
-|---------------------------|-------------------|
+| ------------------------- | ----------------- |
 | `new`                     | `"todo"`          |
 | `indeterminate`           | `"inprogress"`    |
 | `done`                    | `"done"`          |
@@ -117,10 +122,10 @@ Fields: `summary,status,priority,issuetype,assignee,comment,subtasks,parent,upda
 In Next.js 16, params in route handlers are a Promise and must be awaited:
 
 ```typescript
-type RouteContext = { params: Promise<{ path: string[] }> }
+type RouteContext = { params: Promise<{ path: string[] }> };
 
 export async function GET(req: NextRequest, { params }: RouteContext) {
-  const { path } = await params
+  const { path } = await params;
   // ...
 }
 ```
